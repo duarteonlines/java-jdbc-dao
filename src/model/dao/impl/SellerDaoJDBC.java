@@ -5,7 +5,6 @@ import db.DbException;
 import model.dao.SellerDao;
 import model.entities.Department;
 import model.entities.Seller;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -71,10 +70,8 @@ public class SellerDaoJDBC implements SellerDao {
             st.setInt(5, obj.getDepartment().getId());
             st.setInt(6, obj.getId());
 
-            int rows = st.executeUpdate();
-            if (rows == 0) {
-                throw new DbException("Non-existent ID");
-            }
+            st.executeUpdate();
+
         } catch (SQLException e) {
             throw new DbException(e.getMessage());
         } finally {
@@ -89,8 +86,10 @@ public class SellerDaoJDBC implements SellerDao {
             st = conn.prepareStatement(
                     "DELETE FROM seller WHERE Id = ?");
             st.setInt(1, id);
-            st.executeUpdate();
-
+            int rows = st.executeUpdate();
+            if (rows == 0) {
+                throw new DbException("Non-existent ID");
+            }
         } catch (SQLException e) {
             throw new DbException(e.getMessage());
         } finally {
@@ -123,24 +122,6 @@ public class SellerDaoJDBC implements SellerDao {
             DB.closeStatement(st);
             DB.closeResultSet(rs);
         }
-    }
-
-    private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
-        Seller obj = new Seller();
-        obj.setId(rs.getInt("Id"));
-        obj.setName(rs.getString("Name"));
-        obj.setEmail(rs.getString("Email"));
-        obj.setBaseSalary(rs.getDouble("BaseSalary"));
-        obj.setBirthDate(rs.getDate("BirthDate"));
-        obj.setDepartment(dep);
-        return obj;
-    }
-
-    private Department instantiateDepartment(ResultSet rs) throws SQLException {
-        Department dep = new Department();
-        dep.setId(rs.getInt("DepartmentId"));
-        dep.setName(rs.getString("DepName"));
-        return dep;
     }
 
     @Override
@@ -209,5 +190,23 @@ public class SellerDaoJDBC implements SellerDao {
             DB.closeStatement(st);
             DB.closeResultSet(rs);
         }
+    }
+
+    private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
+        Seller obj = new Seller();
+        obj.setId(rs.getInt("Id"));
+        obj.setName(rs.getString("Name"));
+        obj.setEmail(rs.getString("Email"));
+        obj.setBaseSalary(rs.getDouble("BaseSalary"));
+        obj.setBirthDate(rs.getDate("BirthDate"));
+        obj.setDepartment(dep);
+        return obj;
+    }
+
+    private Department instantiateDepartment(ResultSet rs) throws SQLException {
+        Department dep = new Department();
+        dep.setId(rs.getInt("DepartmentId"));
+        dep.setName(rs.getString("DepName"));
+        return dep;
     }
 }
